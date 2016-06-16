@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script>
+        $(function () {
+            $(document).ready(function () {
+                //first get link to player page
+				$.ajax({
+					 url: "http://www.cbssports.com/golf/leaderboard/pga-tour/1186094/us-open&callback=?",
+					 dataType: 'xml',
+					 success: function(data) {
+							var type = 1;
+							var type2 = 2;
+						},
+						jsonp: 'jsonp',
+				});
+			});
+		});
+    </script>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <table id="entry">
+        <tr id="golfer1">
+            <td>Dustin Johnson</td>
+        </tr>
+        <tr id="golfer2">
+            <td>Brooks Koepka</td>
+        </tr>
+        <tr id="golfer3">
+            <td>Bryson DeChambeau</td>
+        </tr>
+        <tr id="golfer4">
+            <td>Zach Johnson</td>
+        </tr>
+
+    </table>
+</body>
+</html>
