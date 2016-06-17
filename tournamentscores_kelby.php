@@ -14,10 +14,10 @@ if($conn->connect_errno){
 
 if(!($sql = $conn->prepare(
     "SELECT Golfers.Golfer_Name, 
-    		GolferScores.Hole_1, GolferScores.Hole_2, GolferScores.Hole_3, GolferScores.Hole_4
-    		GolferScores.Hole_5, GolferScores.Hole_6, GolferScores.Hole_7, GolferScores.Hole_8
-    		GolferScores.Hole_9, GolferScores.Hole_10, GolferScores.Hole_11, GolferScores.Hole_12
-    		GolferScores.Hole_13, GolferScores.Hole_14, GolferScores.Hole_15, GolferScores.Hole_16
+    		GolferScores.Hole_1, GolferScores.Hole_2, GolferScores.Hole_3, GolferScores.Hole_4,
+    		GolferScores.Hole_5, GolferScores.Hole_6, GolferScores.Hole_7, GolferScores.Hole_8,
+    		GolferScores.Hole_9, GolferScores.Hole_10, GolferScores.Hole_11, GolferScores.Hole_12,
+    		GolferScores.Hole_13, GolferScores.Hole_14, GolferScores.Hole_15, GolferScores.Hole_16,
     		GolferScores.Hole_17, GolferScores.Hole_18
      FROM GolferScores
      INNER JOIN Golfers ON GolferScores.Golfer_ID = Golfers.ID"
@@ -34,11 +34,7 @@ if(!$sql->bind_result($pname, $h1, $h2, $h3, $h4, $h5, $h6, $h7, $h8, $h9,
       echo "Bind failed: "  . $conn->connect_errno . " " . $conn->connect_error;
 }
 
-echo "<table border='1'>
-		<tr>
-			<th></th>
-			<th colspan='18'>Hole</th>
-		</tr>";
+echo "<table border='1'>";
 
 echo "	<tr>
 			<th></th>
@@ -89,7 +85,7 @@ echo "	<tr>
 
 while($sql->fetch()) {
   echo  "<tr>" .
-  		"<td>" . $pname . "</td>" .
+  		"<td colspan='2'>" . $pname . "</td>" .
   		"<td>" . $h1    . "</td>" .
   		"<td>" . $h2    . "</td>" .
   		"<td>" . $h3    . "</td>" .

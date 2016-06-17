@@ -16,7 +16,7 @@ $(document).ready(function() {
     $("#display").click(function() {
         $.ajax({
             type: "GET",
-            url: "http://174.129.171.133/tournamentscores.php",
+            url: "http://174.129.171.133/tournamentscores_kelby.php",
             dataType: "html",
             success: function(response) {
                 $("#table").html(response);
@@ -33,12 +33,9 @@ $(document).ready(function() {
     </div>
     <div id="playerscores">
         <input type="button" id="display" value="Query Database" />
-        <table id="table">
-            <tr>
-                <td>Player</td>
-                <td>
-            </tr>
-        </table>
+        <div id="table">
+
+        </div>
     </div>
     <div id="responsecontainer" align="center">
     </div>

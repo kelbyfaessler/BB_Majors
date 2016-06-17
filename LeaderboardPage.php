@@ -101,7 +101,7 @@ foreach($entries as $e)
 		$arr =  explode(" ", $body);
 		$playerPageUrl = "";
 		foreach($arr as $v){
-			echo "<br>" . $v;
+			//echo "<br>" . $v;
 			if(strpos($v, 'href') !== false)
 			{
 				if(strpos($v, "playerpage") && strpos($v, "cbssports"))
