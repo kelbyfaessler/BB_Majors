@@ -68,14 +68,18 @@ foreach($entries as $e)
 	$e->player = $row["Name"];
 	for($i=0; $i < 4 ; $i++)
 	{
-		$sql = "SELECT Golfer_Name FROM Golfers WHERE ID=". $e->golfers[$i]["ID"];
+		$sql = "SELECT Golfer_Name, PlayerPage FROM Golfers WHERE ID=". $e->golfers[$i]["ID"];
 		$result = $conn->query($sql);
 		$row=$result->fetch_assoc();
 		$e->golfers[$i]["Name"] = $row["Golfer_Name"];
+		if($row["PlayerPage"]!==null && $row["PlayerPage"] != '')
+		{
+			$e->golfers[$i]["PlayerPage"] = $row["PlayerPage"];
+		}
 	}
 }
 unset($e);
-
+echo "Finished Grabbing Entry Data";
 //here is the magic
 //we google the player name and "CBSSPORTS" and "PLAYERPAGE"
 //this gives us the direct link to the player page, from which we can get their hole by hole data
@@ -83,12 +87,16 @@ foreach($entries as $e)
 {
 	for($i=0; $i < 4; $i++)
 	{
+		
+		if(strpos($e->golfers[$i]["PlayerPage"], 'cbssports') === false)
+		{
+			echo "<br>Getting Player URL";
 		// The request also includes the userip parameter which provides the end
 		// user's IP address. Doing so will help distinguish this legitimate
 		// server-side traffic from traffic which doesn't come from an end-user.
-		$url = 'https://www.googleapis.com/customsearch/v1?key=AIzaSyCtYDYedySqc3VyEOsU2LyqC6l67MANF98&cx=012557125435830414214:wuek1hiu0n8&alt=atom' . "&q=cbs+player+page+" . str_replace(' ', '+', $e->golfers[$i]["Name"]);
+		$url = 'https://www.googleapis.com/customsearch/v1?key=AIzaSyC4e4L8fQX6rVWXQvTwXqLRa2WGPGEEGWk&cx=012557125435830414214:wuek1hiu0n8&alt=atom' . "&q=cbs+player+page+" . str_replace(' ', '+', $e->golfers[$i]["Name"]);
 		
-		echo "<br>" . $url;
+		//echo "<br>" . $url;
 		// sendRequest
 		// note how referer is set manually
 		 $ch = curl_init();
@@ -101,23 +109,45 @@ foreach($entries as $e)
 		$arr =  explode(" ", $body);
 		$playerPageUrl = "";
 		foreach($arr as $v){
-			//echo "<br>" . $v;
+			echo "<br>" . $v;
 			if(strpos($v, 'href') !== false)
 			{
 				if(strpos($v, "playerpage") && strpos($v, "cbssports"))
 				{
 					$a = new SimpleXMLElement("<a " . $v . "></a>");
 					$playerPageUrl= $a['href'];
-					echo $playerPageUrl;
+					//echo $playerPageUrl;
 				}
 			}
 		}
 		//store the player page URL
 		$e->golfers[$i]["PlayerPage"] = $playerPageUrl;
+		}
+		else
+			echo "<br>Already have player URL";
 
 	}
 }
 unset($e);
+
+// //here we should push the PlayerPage values into the Golfers table
+ $conn = new mysqli($servername, $username, $password, $dbname);
+ foreach($entries as $e)
+ {
+	 for($i = 0; $i < 4; $i++)
+	 {
+		 $sql = "UPDATE Golfers SET PlayerPage =  '" . $e->golfers[$i]["PlayerPage"] . "' WHERE ID=" . $e->golfers[$i]["ID"];
+		 if($conn->query($sql) === TRUE)
+		 {
+			 echo "Record Updated Sucessfully";
+		 }
+		 else {
+			 echo "Error Updating Record";
+		 }
+	 }
+ }
+ $conn->close();
+
 
 //go get the full player page.
 foreach($entries as $e)
@@ -127,9 +157,9 @@ foreach($entries as $e)
 	{
 		echo "<br>..." . $e->golfers[$i]["Name"] . " ---- " . $e->golfers[$i]["PlayerPage"];
 		$url = $e->golfers[$i]["PlayerPage"];
-		$output = file_get_contents($url);
+		//$output = file_get_contents($url);
 		//pass to the parsing function
-		$sd = GetScorecardDataFromHtml($output);
+		//$sd = GetScorecardDataFromHtml($output);
 	}
 }
 unset($e);

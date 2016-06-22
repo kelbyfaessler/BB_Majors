@@ -1,5 +1,5 @@
 <?php
-/*
+
 define('INCLUDE_CHECK',true);
 
 require 'connect.php';
@@ -55,7 +55,7 @@ if($_POST['submit']=='Login')
 		
 		// Escaping all input data
 
-		$row = mysqli_fetch_assoc(mysqli_query("SELECT id,usr FROM tz_members WHERE usr='{$_POST['username']}' AND pass='".md5($_POST['password'])."'"));
+		$row = mysqli_fetch_assoc($link->query("SELECT id,usr FROM mbb_members WHERE usr='{$_POST['username']}' AND pass='".md5($_POST['password'])."'"));
 
 		if($row['usr'])
 		{
@@ -85,7 +85,7 @@ else if($_POST['submit']=='Register')
 	
 	$err = array();
 	
-	if(strlen($_POST['username'])<4 || strlen($_POST['username'])>32)
+	if(strlen($_POST['username'])<3 || strlen($_POST['username'])>32)
 	{
 		$err[]='Your username must be between 3 and 32 characters!';
 	}
@@ -107,28 +107,28 @@ else if($_POST['submit']=='Register')
 		$pass = substr(md5($_SERVER['REMOTE_ADDR'].microtime().rand(1,100000)),0,6);
 		// Generate a random password
 		
-		$_POST['email'] = mysqli_real_escape_string($_POST['email']);
-		$_POST['username'] = mysqli_real_escape_string($_POST['username']);
+		//$_POST['email'] = mysqli_real_escape_string($_POST['email']);
+		//$_POST['username'] = mysqli_real_escape_string($_POST['username']);
 		// Escape the input data
 		
-		
-		mysqli_query("	INSERT INTO mbb_members(usr,pass,email,regIP,dt)
-						VALUES(
-						
+		$sql_query_string = "	INSERT INTO mbb_members(usr,pass,email,dt)
+						VALUES(						
 							'".$_POST['username']."',
 							'".md5($pass)."',
 							'".$_POST['email']."',
-							'".$_SERVER['REMOTE_ADDR']."',
-							NOW()
-							
-						)");
+							NOW()							
+						)";
+		$message = $sql_query_string;
+		echo "<script type='text/javascript'>alert('$message');</script>";
+		$link->query($sql_query_string);
 		
 		if(mysqli_affected_rows($link)==1)
 		{
-			send_mail(	'',
+			if(!send_mail(	'jstella06@gmail.com',
 						$_POST['email'],
 						'Registration System Demo - Your New Password',
-						'Your password is: '.$pass);
+						'Your password is: '.$pass))
+						$err[] = "Failed to send email";
 
 			$_SESSION['msg']['reg-success']='We sent you an email with your new password!';
 		}
@@ -161,7 +161,7 @@ if($_SESSION['msg'])
 	
 	</script>';
 	
-}*/
+}
 ?>
 
 
@@ -306,22 +306,10 @@ if($_SESSION['msg'])
 <div class="pageContent">
     <div id="main">
       <div class="container">
-        <h1>A Cool Login System</h1>
-        <h2>Easy registration management with PHP &amp; jQuery</h2>
+        <h1>Majors Best Ball</h1>
+        <h2>new site!</h2>
         </div>
-        
-        <div class="container">
-        
-          <p>This is a simple example site demonstrating the <a href="http://tutorialzine.com/2009/10/cool-login-system-php-jquery/">Cool Login System tutorial</a> on <strong>Tutorialzine</strong>. You can start by clicking the <strong>Log In | Register</strong> button above.  After registration, an email will be sent to you with your new password.</p>
-          <p><a href="registered.php" target="_blank">View a test page</a>, only accessible by <strong>registered users</strong>.</p>
-          <p>The sliding jQuery panel, used in this example, was developed by  <a href="http://web-kreation.com/index.php/tutorials/nice-clean-sliding-login-panel-built-with-jquery" title="Go to site">Web-Kreation</a>.</p>
-          <p>You are free to build upon this code and use it in your own sites.</p>
-          <div class="clear"></div>
-        </div>
-        
-      <div class="container tutorial-info">
-      This is a tutorialzine demo. View the <a href="http://tutorialzine.com/2009/10/cool-login-system-php-jquery/" target="_blank">original tutorial</a>, or download the <a href="demo.zip">source files</a>.    </div>
-    </div>
+
 </div>
 
 </body>
