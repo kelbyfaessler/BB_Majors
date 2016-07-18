@@ -21,17 +21,16 @@ if(!($sql = $conn->prepare(
     		GolferScores.Hole_17, GolferScores.Hole_18
      FROM GolferScores
      INNER JOIN Golfers ON GolferScores.Golfer_ID = Golfers.ID"
-))){
-	echo "Prepare failed: "  . $sql->errno . " " . $sql->error;
-}
+    ))){
+      echo "Prepare failed: "  . $stmt->errno . " " . $stmt->error;
+    }
 
 if(!$sql->execute()){
-      echo "Execute failed: "  . $conn->connect_errno . " " . $conn->connect_error;
-}
-
+      echo "Execute failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
+    }
 if(!$sql->bind_result($pname, $h1, $h2, $h3, $h4, $h5, $h6, $h7, $h8, $h9, 
 							  $h10, $h11, $h12, $h13, $h14, $h15, $h16, $h17, $h18)){
-      echo "Bind failed: "  . $conn->connect_errno . " " . $conn->connect_error;
+      echo "Bind failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
 }
 
 echo "<table border='1'>
@@ -109,8 +108,8 @@ while($sql->fetch()) {
   		"<td>" . $h17   . "</td>" .
   		"<td>" . $h18   . "</td>" .
   		"</tr>";
+  }
 }
-
 
 echo "</table>";
 

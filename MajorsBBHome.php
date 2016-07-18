@@ -1,6 +1,6 @@
 <?php
- // ini_set('display_errors', '1');
- // ini_set('error_reporting', E_ALL);
+  //ini_set('display_errors', '1');
+  //ini_set('error_reporting', E_ALL);
  
  
 define('INCLUDE_CHECK',true);
@@ -35,7 +35,7 @@ if(isset($_GET['logoff']))
 	$_SESSION = array();
 	session_destroy();
 	
-	header("Location: demo.php");
+	header("Refresh:0");
 	exit;
 }
 
@@ -81,7 +81,7 @@ if($_POST['submit']=='Login')
 	$_SESSION['msg']['login-err'] = implode('<br />',$err);
 	// Save the error messages in the session
 
-	header("Location: demo.php");
+	header("Refresh:0");
 	exit;
 }
 else if($_POST['submit']=='Register')
@@ -148,7 +148,7 @@ else if($_POST['submit']=='Register')
 		$_SESSION['msg']['reg-err'] = implode('<br />',$err);
 	}	
 	
-	header("Location: demo.php");
+	header("Refresh:0");
 	exit;
 }
 
@@ -178,12 +178,12 @@ if($_SESSION['msg'])
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>A Cool Login System With PHP MySQL &amp jQuery | Tutorialzine demo</title>
+<title>Best Ball Majors Home Page</title>
     
     <link rel="stylesheet" type="text/css" href="demo.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="login_panel/css/slide.css" media="screen" />
     
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
     
     <!-- PNG FIX for IE6 -->
     <!-- http://24ways.org/2007/supersleight-transparent-png-in-ie6 -->
@@ -192,8 +192,62 @@ if($_SESSION['msg'])
     <![endif]-->
     
     <script src="login_panel/js/slide.js" type="text/javascript"></script>
-    
+    <script src="sortable.js" type="text/javascript"></script>
     <?php echo $script; ?>
+	<script type=text/javascript>
+	
+	function sort_table(){
+		var table = $('#scoreboard');
+
+		$('#totPlayer')
+			.wrapInner('<span title="sort this column"/>')
+			.each(function(){
+
+				var th = $(this),
+					thIndex = th.index(),
+					inverse = false;
+
+				th.each(function(){
+
+					table.find('td').filter(function(){
+
+						return $(this).index() === thIndex;
+
+					}).sortElements(function(a, b){
+
+						if( parseInt($.text([a])) == parseInt($.text([b])) )
+							return 0;
+
+						return parseInt($.text([a])) > parseInt($.text([b])) ?
+							inverse ? -1 : 1
+							: inverse ? 1 : -1;
+
+					}, function(){
+
+						// parentNode is the element we want to move
+						return this.parentNode; 
+
+					});
+
+					inverse = !inverse;
+
+				});
+
+			});
+	}
+	$(document).ready(function(){
+		sort_table();
+	});
+	</script>
+	<style>
+	.tournyHeader{
+		width:150px;
+	}
+	table .scoreboard, td{
+			text-align: center;
+	
+	}
+	</style>
 </head>
 
 <body>
@@ -202,14 +256,7 @@ if($_SESSION['msg'])
 <div id="toppanel">
 	<div id="panel">
 		<div class="content clearfix">
-			<div class="left">
-				<h1>The Sliding jQuery Panel</h1>
-				<h2>A register/login solution</h2>		
-				<p class="grey">You are free to use this login and registration system in you sites!</p>
-				<h2>A Big Thanks</h2>
-				<p class="grey">This tutorial was built on top of <a href="http://web-kreation.com/index.php/tutorials/nice-clean-sliding-login-panel-built-with-jquery" title="Go to site">Web-Kreation</a>'s amazing sliding panel.</p>
-			</div>
-            
+       
             
             <?php
 			
@@ -281,11 +328,7 @@ if($_SESSION['msg'])
             
             <div class="left">
             
-            <h1>Members panel</h1>
-            
-            <p>You can put member-only data here</p>
-            <a href="registered.php">View a special member page</a>
-            <p>- or -</p>
+ 
             <a href="?logoff">Log off</a>
             
             </div>
@@ -315,17 +358,74 @@ if($_SESSION['msg'])
 	
 </div> <!--panel -->
 
+
+   <!-- PUT ALL PAGE CONTENT HERE --> 
+
 <div class="pageContent">
     <div id="main">
-      <div class="container">
-        <h1>Majors Best Ball</h1>
-        <h2>new site!</h2>
-        </div>
+	
+      <div class="container" style="text-align : center">
+        <h1>Best Ball Majors</h1>
+
+
+		<table id="scoreboard">
+			<thead>
+				<tr>
+					<th></th>
+					<th class="tournyHeader">Masters</th>
+					<th class="tournyHeader">US Open</th>
+					<th class="tournyHeader">British</th>
+					<th class="tournyHeader">PGA</th>
+					<th id="totPlayer" class="tournyHeader playerTotal">Total</th>
+				</tr>
+				<tbody>
+				<?php
+					$servername="localhost";
+					$username="anon";
+					$dbname = "MajorsBB";
+					$password="";
+					$conn = new mysqli($servername, $username, $password, $dbname);
+					$sql = "SELECT * FROM Players";
+					$result = $conn->query($sql);
+					if($result->num_rows >0)
+					{						
+						while($row=$result->fetch_assoc())
+						{
+							$playerTotal = 0;
+							echo "<tr>";
+							echo "<td>".$row["Name"]."</td>";
+							for($i=1; $i<5;$i++)
+							{
+								$s = "SELECT sum(Entries.EntryScore) as ScoreTotal FROM Entries INNER JOIN Scorecards ON Entries.Scorecard_ID = Scorecards.ID WHERE Entries.Player=".$row["ID"]." AND Scorecards.Year=2016 AND Scorecards.Tournament=".$i;
+								$r = $conn->query($s);
+								if($r->num_rows >0)
+								{
+									$d = $r->fetch_assoc();
+									$playerTotal +=$d["ScoreTotal"];
+									echo "<td>".$d["ScoreTotal"]."</td>";								
+								}
+								else
+									echo "<td>0</td>";
+							}
+							echo "<td class='playerTotal'>$playerTotal</td></tr>";
+						}						
+					}
+				?>
+			</tbody>
+		</table>
+		</div>
+
+		
 		<div>
-			<table id="scoreboard_table">
-				
-			</table>
-			
+		<h2>
+			<a href="DraftTeam.php?y=2016&t=3">Draft your team for the British Open</a>
+		</h2>	</br>
+		<h2>
+			<a href="LeaderboardPageNoScrape.php?y=2016&t=3">View Leaderboard (British Open)</a>			
+			</h2>
+			<h2>
+			<a href="LeaderboardPageNoScrape.php?y=2016&t=1">2016 Masters Results</a>			
+			</h2>
 		</div>
 
 </div>

@@ -50,36 +50,32 @@ $entries = array();
 	while($row = $result->fetch_assoc()) {	
 		  $en = new Entry();
 	      //populate Entries array which contains a Golfers array
-
 		  $en->player_ID =  $row["Player"];
 		  $en->golfers[0]["ID"] =  $row["Golfer_1"];
 		  $en->golfers[1]["ID"] =  $row["Golfer_2"];
 		  $en->golfers[2]["ID"] =  $row["Golfer_3"];
-		  $en->golfers[3]["ID"] =  $row["Golfer_4"];		  
+		  $en->golfers[3]["ID"] =  $row["Golfer_4"];	
 		  $entries[] = $en;
-		  
-
 	 }
 }
 
 //get friendly names for player and all 4 golfers
 foreach($entries as $e)
 {
-
-	$sql = "SELECT Name FROM Players WHERE ID=". $e->player_ID;			
+	$sql = "SELECT Name FROM Players WHERE ID=". $e->player_ID;
 	$result = $conn->query($sql);
-	$row=$result->fetch_assoc();	
+	$row=$result->fetch_assoc();
 	$e->player = $row["Name"];
 	for($i=0; $i < 4 ; $i++)
 	{
-		$sql = "SELECT Golfer_Name, PlayerPage FROM Golfers WHERE ID=" .$e->golfers[$i]["ID"];
-		echo $sql;
+		$sql = "SELECT Golfer_Name, PlayerPage FROM Golfers WHERE ID=". $e->golfers[$i]["ID"];
 		$result = $conn->query($sql);
 		$row=$result->fetch_assoc();
 		$e->golfers[$i]["Name"] = $row["Golfer_Name"];
 		if($row["PlayerPage"]!==null && $row["PlayerPage"] != '')
 		{
 			$e->golfers[$i]["PlayerPage"] = $row["PlayerPage"];
+			echo $e->golfers[$i]["PlayerPage"];
 		}
 	}
 }
@@ -99,7 +95,7 @@ foreach($entries as $e)
 		// The request also includes the userip parameter which provides the end
 		// user's IP address. Doing so will help distinguish this legitimate
 		// server-side traffic from traffic which doesn't come from an end-user.
-		//$url = 'https://www.googleapis.com/customsearch/v1?key=AIzaSyC4e4L8fQX6rVWXQvTwXqLRa2WGPGEEGWk&cx=012557125435830414214:wuek1hiu0n8&alt=atom' . "&q=cbs+player+page+" . str_replace(' ', '+', $e->golfers[$i]["Name"]);
+		$url = 'https://www.googleapis.com/customsearch/v1?key=AIzaSyC4e4L8fQX6rVWXQvTwXqLRa2WGPGEEGWk&cx=012557125435830414214:wuek1hiu0n8&alt=atom' . "&q=cbs+player+page+" . str_replace(' ', '+', $e->golfers[$i]["Name"]);
 		
 		//echo "<br>" . $url;
 		// sendRequest
@@ -114,7 +110,7 @@ foreach($entries as $e)
 		$arr =  explode(" ", $body);
 		$playerPageUrl = "";
 		foreach($arr as $v){
-			echo "<br>" . $v;
+			//echo "<br>" . $v;
 			if(strpos($v, 'href') !== false)
 			{
 				if(strpos($v, "playerpage") && strpos($v, "cbssports"))
@@ -129,7 +125,7 @@ foreach($entries as $e)
 		$e->golfers[$i]["PlayerPage"] = $playerPageUrl;
 		}
 		else
-			echo "<br>Already have player URL";
+			//echo "<br>Already have player URL";
 
 	}
 }
@@ -144,10 +140,10 @@ unset($e);
 		 $sql = "UPDATE Golfers SET PlayerPage =  '" . $e->golfers[$i]["PlayerPage"] . "' WHERE ID=" . $e->golfers[$i]["ID"];
 		 if($conn->query($sql) === TRUE)
 		 {
-			 echo "Record Updated Sucessfully";
+			 //echo "Record Updated Sucessfully";
 		 }
 		 else {
-			 echo "Error Updating Record";
+			 //echo "Error Updating Record";
 		 }
 	 }
  }
