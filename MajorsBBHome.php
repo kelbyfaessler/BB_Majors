@@ -418,15 +418,21 @@ if($_SESSION['msg'])
 		
 		<div>
 		<h2>
-			<a href="DraftTeam.php?y=2016&t=3">Draft your team for the British Open</a>
+			<a href="DraftTeam.php?y=2016&t=4">Draft your team for the PGA Championship</a>
 		</h2>	</br>
 		<h2>
-			<a href="LeaderboardPageNoScrape.php?y=2016&t=3">View Leaderboard (British Open)</a>			
+				<a href="LeaderboardPageNoScrape.php?y=2016&t=4">View Leaderboard (PGA)</a>			
 			</h2>
 			<h2>
-			<a href="LeaderboardPageNoScrape.php?y=2016&t=1">2016 Masters Results</a>			
+				<a href="LeaderboardPageNoScrape.php?y=2016&t=1">2016 Masters Results</a>			
 			</h2>
-		</div>
+			<h2>
+				<a href="LeaderboardPageNoScrape.php?y=2016&t=2">2016 US Open Results</a>			
+			</h2>
+			<h2>
+				<a href="LeaderboardPageNoScrape.php?y=2016&t=3">2016 British Open Results</a>			
+			</h2>
+			</div>
 
 </div>
 
