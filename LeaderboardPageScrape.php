@@ -7,12 +7,8 @@ define('INCLUDE_CHECK',true);
 
 require 'connect.php';
 require 'functions.php';
-// Those two files can be included only if INCLUDE_CHECK is defined
-function CalculateEntryScores()
-{
 
-	
-}
+
 		//this function so far just finds the DIV that holds the table of hole-by-hole data
 		function GetScorecardDataFromHtml($input, $rnd)
 		{
@@ -154,6 +150,8 @@ function CalculateEntryScores()
 			}
 			
 		}
+		
+		
 		
 		
 session_name('tzLogin');
@@ -372,8 +370,7 @@ class Golfer {
 		else
 			return score;
 	}
-	function CalculateScore(player, round, hole){
-		
+	function CalculateScore(player, round, hole){		
 			var par = $(".r" + round + "h" + hole + "par.holePar").html();
 			
 			var g1score = $("." + player + "> .r" + round + "h" + hole + "g" + 0 + "score.holeScore").html();
@@ -475,6 +472,24 @@ class Golfer {
 			return true;
 	}
 	$(document).ready(function(){
+		var count = 1200 - parseInt($("#refreshInterval").html());
+		var counter = setInterval(timer, 1000);
+		function str_pad_left(string,pad,length) {
+			return (new Array(length+1).join(pad)+string).slice(-length);
+		}
+		function timer()
+		{
+			count = count -1;
+			if(count <=0)
+			{
+				location.reload();
+				return;
+			}
+			var minutes = Math.floor(count/60);
+			var seconds = count-minutes*60;
+			$("#refreshInterval").html("Refreshing in: " + str_pad_left(minutes,'0',2) + ":" + str_pad_left(seconds,'0',2));
+			
+		}
 		$(".scoreRow").each(function(){
 			var player = $(this).attr("player");
 			var playerTotalScore=0;
@@ -684,7 +699,7 @@ class Golfer {
 	if($conn->connect_error){
 	 echo "Error connecting to DB";
 	}
-
+	
 	//query string params from URL
 	$y = $_GET["y"];
 	$t = $_GET["t"];
@@ -755,11 +770,11 @@ class Golfer {
 			  <td class='r".$j."totPar holePar'>".$row["TotalPar"]."</td>";
 	}
 	echo "</tr>";
-	
-	
-	//iterate through each player
+	//iterate through each player		
+	$intervalPrinted = false;
 	for($j=1; $j<6; $j++)
 	{
+		
 		//print player name on new row
 		$sql = "SELECT Name FROM Players WHERE ID=" .$j;
 		$result=$conn->query($sql);
@@ -770,6 +785,12 @@ class Golfer {
 			echo "<tr class='".$playerName."'><td class='golferName'>".$playerName."</td></tr>";
 		}
 
+		
+		
+		
+		
+		
+		
 		//get all entries from this player for this tournament
 		$sql = "SELECT Entries.Player as P, Entries.Golfer_1 as G1, Entries.Golfer_2 as G2, Entries.Golfer_3 as G3, Entries.Golfer_4 as G4, Entries.ID as eID, Scorecards.ID as scID, Scorecards.Year as Year, Scorecards.Tournament as Tournament, Scorecards.Round as Round FROM Entries INNER JOIN Scorecards ON Entries.Scorecard_ID=Scorecards.ID WHERE ((Scorecards.Year=".$y.") AND (Scorecards.Tournament=".$t.") AND (Entries.Player=".$j.")) ORDER BY Entries.Scorecard_ID";
 		$result = $conn->query($sql);
@@ -902,11 +923,13 @@ class Golfer {
 
 		
 		//iterate on ROUNDS here.  Need to print a whole row at a time (R1-G1 scores R2-G1 scores R3-G1 scores R4-G1 scores)
+
 		for($i=0; $i < 4 ; $i++)
 		{
 			echo "<tr class='".$playerName."'>";
 			//go through each entry and use only the indexed golfer
 			$roundNumber = 1;
+			$lastRefreshUpdated = false;
 			foreach($entries as $e)
 			{
 				
@@ -937,17 +960,38 @@ class Golfer {
 							
 						if(!$done)
 						{
-							
-							if($e->rnd == $roundNumber)
+							$sql = "SELECT LastRefreshed FROM Scorecards WHERE ID = " .$e->scID;
+							$result = $conn->query($sql);
+							$row = $result->fetch_assoc();
+							$lastScrapeTimeStamp=$row["LastRefreshed"];
+							$lastScrapeTime=strtotime($lastScrapeTimeStamp);					
+							$curTime = time();
+							$interval = $curTime - $lastScrapeTime;
+							if(!$intervalPrinted)
 							{
-								//echo "</br>Here comes data for ".$e->golfers[$i]["Name"];
-								$url = $e->golfers[$i]["PlayerPage"];
-								$output = file_get_contents($url);
-								//pass to the parsing function
-								$hScores = GetScorecardDataFromHtml($output, $roundNumber);
-								//echo $hScores;
-								SubmitGolferScores($hScores, $e->golfers[$i]["ID"], $e->scID, $e->entryID);
+								echo "</br><span id='refreshInterval'>$interval</span>";
+								$intervalPrinted = true;
 							}
+							//if($interval > 1200)
+							//{
+								echo "New Scrape Happening...";
+								if(!$lastRefreshUpdated)
+								{
+									$sql = "UPDATE Scorecards SET LastRefreshed= now() WHERE ID = " .$e->scID;
+									$result = $conn->query($sql);
+									$lastRefreshUpdated = true;
+								}
+								if($e->rnd == $roundNumber)
+								{
+									echo "</br>Here comes data for ".$e->golfers[$i]["Name"];
+									$url = $e->golfers[$i]["PlayerPage"];
+									$output = file_get_contents($url);
+									//pass to the parsing function
+									$hScores = GetScorecardDataFromHtml($output, $roundNumber);
+									//echo $hScores;
+									SubmitGolferScores($hScores, $e->golfers[$i]["ID"], $e->scID, $e->entryID);
+								}
+							//}
 						}
 					}
 					
@@ -1049,11 +1093,8 @@ class Golfer {
 								<td class='r".$i."totalTeamScore holeScore'></td>
 								<td></td><td></td>"; 
 		 }
-		 echo "</tr><tr><td>----</td><tr>";
-		 
+		 echo "</tr><tr><td>----</td><tr>";		 
 	}
-	
-
 		
 	
 	//echo "</tr>";

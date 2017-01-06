@@ -365,17 +365,17 @@ if($_SESSION['msg'])
     <div id="main">
 	
       <div class="container" style="text-align : center">
-        <h1>Best Ball Majors</h1>
+        <h1>Best Ball Majors 2016</h1>
 
 
 		<table id="scoreboard">
 			<thead>
 				<tr>
 					<th></th>
-					<th class="tournyHeader">Masters</th>
-					<th class="tournyHeader">US Open</th>
-					<th class="tournyHeader">British</th>
-					<th class="tournyHeader">PGA</th>
+					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=1">Masters</a></th>
+					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=2">US Open</a>	</th>
+					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=3">British Open</a>	</th>
+					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=4">PGA Champ</a></th>
 					<th id="totPlayer" class="tournyHeader playerTotal">Total</th>
 				</tr>
 				<tbody>
@@ -414,26 +414,6 @@ if($_SESSION['msg'])
 			</tbody>
 		</table>
 		</div>
-
-		
-		<div>
-		<h2>
-			<a href="DraftTeam.php?y=2016&t=4">Draft your team for the PGA Championship</a>
-		</h2>	</br>
-		<h2>
-				<a href="LeaderboardPageNoScrape.php?y=2016&t=4">View Leaderboard (PGA)</a>			
-			</h2>
-			<h2>
-				<a href="LeaderboardPageNoScrape.php?y=2016&t=1">2016 Masters Results</a>			
-			</h2>
-			<h2>
-				<a href="LeaderboardPageNoScrape.php?y=2016&t=2">2016 US Open Results</a>			
-			</h2>
-			<h2>
-				<a href="LeaderboardPageNoScrape.php?y=2016&t=3">2016 British Open Results</a>			
-			</h2>
-			</div>
-
 </div>
 
 </body>
