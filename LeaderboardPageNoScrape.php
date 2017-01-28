@@ -802,16 +802,21 @@ class Golfer {
 	echo "</tbody>";
 	$intervalPrinted = false;
 	$letsRefresh = false;
-	for($j=1; $j<6; $j++)
+$sql = "SELECT COUNT(*) as num_players FROM mbb_members";
+$result=$conn->query($sql);
+$row = $result->fetch_assoc();
+$num_players = $row["num_players"];
+	for($j=1; $j<=$num_players; $j++)
 	{
+
 		echo "<tbody class='pGroup'>";
 		//print player name on new row
-		$sql = "SELECT Name FROM Players WHERE ID=" .$j;
+		$sql = "SELECT usr FROM mbb_members WHERE id=" .$j;
 		$result=$conn->query($sql);
 		if($result->num_rows > 0)
 		{
 			$row = $result->fetch_assoc();
-			$playerName=$row["Name"];
+			$playerName=$row["usr"];
 			echo "<tr class='".$playerName."'>";
 			echo "<td class='playerName' colspan=21>".$playerName."</td>";
 			echo "<td class='playerName' colspan=21>".$playerName."</td>";
@@ -823,8 +828,7 @@ class Golfer {
 		//get all entries from this player for this tournament
 		$sql = "SELECT Entries.Player as P, Entries.Golfer_1 as G1, Entries.Golfer_2 as G2, Entries.Golfer_3 as G3, Entries.Golfer_4 as G4, Entries.ID as eID, Scorecards.ID as scID, Scorecards.Year as Year, Scorecards.Tournament as Tournament, Scorecards.Round as Round  FROM Entries INNER JOIN Scorecards ON Entries.Scorecard_ID=Scorecards.ID WHERE ((Scorecards.Year=".$y.") AND (Scorecards.Tournament=".$t.") AND (Entries.Player=".$j.")) ORDER BY Entries.Scorecard_ID";
 		$result = $conn->query($sql);
-		if(!$result)
-			echo $conn->error;
+		
 
 		//fill an entries array with all entries for this player for this tournament
 		$entries = array();
@@ -853,8 +857,8 @@ class Golfer {
 			 for($i=0; $i < 4 ; $i++)
 			 {
 				 $sql = "SELECT Golfer_Name, PlayerPage FROM Golfers WHERE ID=". $e->golfers[$i]["ID"];
-				 $result = $conn->query($sql);
-				 if($result->num_rows > 0)
+				 
+				 if($result = $conn->query($sql))
 				 {
 					 $row=$result->fetch_assoc();
 					 $e->golfers[$i]["Name"] = $row["Golfer_Name"];	
