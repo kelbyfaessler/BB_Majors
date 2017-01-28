@@ -241,12 +241,19 @@ if($_SESSION['msg'])
 	</script>
 	<style>
 	.tournyHeader{
-		width:150px;
+		width:200px;
 	}
-	table .scoreboard, td{
+	.center-align-text td{
 			text-align: center;
 	
 	}
+	td.left-align-text {
+		text-align: left; 
+	}
+	#rules li {
+		text-align: left; !important
+		padding-left: 35px;
+}		
 	</style>
 </head>
 
@@ -365,6 +372,92 @@ if($_SESSION['msg'])
     <div id="main">
 	
       <div class="container" style="text-align : center">
+
+
+	<h1>Best Ball Majors 2017</h1>
+<table style='padding-left:30px; padding-right:30px;'>
+<tr>
+<td>
+</br>
+</td>
+<td>
+<h3>
+Welcome to the 2017 season!  We decided to expand the game to include more tournaments, and with that comes more rules (duh!).  The proposed new tournaments are listed below.  The schedule has roughly one tournament per month for a total of 9 tournaments, including the 4 majors.  See below for rules:
+<br>
+<br>
+<ol id='rules'>
+<li>Your season long score will be your score from all 4 Majors plus your best 3 scores from the non-Majors</li>
+<li>Total buy-in per person is 60 dollars for the season</li>
+<li>Payout breakdowns below based on 6 people:
+<ul>
+<li>Non-major tournament winners: $15</li>
+<li>Major tournament winners: $25</li>
+<li>Season first place: $125</li>
+<li>Season second place $60</li>
+</ul>
+</li>
+
+</ol>
+<br><br>
+</h3>
+</td>
+</tr>
+</table>
+<table id="regular-rules">
+<h3 class="black-text">
+<ul style="list-style:none;color:black">
+Rules:
+<li>Draft your team for each round prior to the first tee times of the day</li>
+<li>Drafts will be automatically locking at the beginning of each round of golf.  I am going to make this automatic this year - so no exceptions</li>
+<li>Keep your total salary under the cap (salaries provided by draft kings)</li>
+<li>Your team will automatically persist for each round, but you may change it (players will get cut)</li>
+<li>Scored as best ball: lowest score on the hole by your team is your score on the hole</li>
+<li>First tie-breaker: Lowest round score for tournament</li>
+<li>Second tie-breaker: Eagle count for tournament</li>
+<li>Third tie-breaker: Birdie count for tournament</li>
+(Birdie/Eagle counts are for you, not for your players)
+<br>
+<br>
+</ul>
+</h3>
+</table>
+	<table id="schedule">
+		<thead>
+				<tr>
+					<th class="tournyHeader">Tournament</th>
+					<th class="tournyHeader">Date</th>
+					<th class="tournyHeader">Draft</th>
+					<th class="tournyHeader">Results</th>
+					<th id="winnerPlayer" class="tournyHeader">Winner</th>
+				</tr>
+				<tbody>
+				<?php
+					$servername="localhost";
+					$username="anon";
+					$dbname = "MajorsBB";
+					$password="";
+					$conn = new mysqli($servername, $username, $password, $dbname);
+					$sql = "SELECT Name, StartDate FROM Scorecards WHERE YEAR(StartDate)=2017 GROUP BY Name ORDER BY StartDate";
+					$result = $conn->query($sql);
+					$counter= 0;
+					if($result->num_rows >0)
+					{						
+						while($row=$result->fetch_assoc())
+						{
+							$counter=  $counter +1;
+							$playerTotal = 0;
+							echo "<tr>";
+							echo "<td class='left-align-text'>".$row["Name"]."</td>";
+							echo "<td class='left-align-text'>".date("l, F j", strtotime($row["StartDate"]))."</td>";
+							echo "<td><a href='DraftTeam.php?y=2017&t=".$counter."'>Draft</a></td>";
+							echo "<td><a href='LeaderboardPageNoScrape.php?y=2017&t=".$counter."'>Leaderboard</td>";
+							echo "</tr>";
+						}						
+					}
+				?>
+			</tbody>
+	</table>
+
         <h1>Best Ball Majors 2016</h1>
 
 
@@ -393,7 +486,7 @@ if($_SESSION['msg'])
 						{
 							$playerTotal = 0;
 							echo "<tr>";
-							echo "<td>".$row["Name"]."</td>";
+							echo "<td class='center-align-text'>".$row["Name"]."</td>";
 							for($i=1; $i<5;$i++)
 							{
 								$s = "SELECT sum(Entries.EntryScore) as ScoreTotal FROM Entries INNER JOIN Scorecards ON Entries.Scorecard_ID = Scorecards.ID WHERE Entries.Player=".$row["ID"]." AND Scorecards.Year=2016 AND Scorecards.Tournament=".$i;
@@ -402,12 +495,12 @@ if($_SESSION['msg'])
 								{
 									$d = $r->fetch_assoc();
 									$playerTotal +=$d["ScoreTotal"];
-									echo "<td>".$d["ScoreTotal"]."</td>";								
+									echo "<td class='center-align-text'>".$d["ScoreTotal"]."</td>";								
 								}
 								else
-									echo "<td>0</td>";
+									echo "<td class='center-align-text'>0</td>";
 							}
-							echo "<td class='playerTotal'>$playerTotal</td></tr>";
+							echo "<td class='playerTotal center-align-text'>$playerTotal</td></tr>";
 						}						
 					}
 				?>
