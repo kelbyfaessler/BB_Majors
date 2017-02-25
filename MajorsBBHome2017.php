@@ -3,6 +3,8 @@
   //ini_set('error_reporting', E_ALL);
  
  
+
+
 define('INCLUDE_CHECK',true);
 
 require 'connect.php';
@@ -241,26 +243,11 @@ if($_SESSION['msg'])
 	</script>
 	<style>
 	.tournyHeader{
-		width:200px;
+		width:150px;
 	}
-	.center-align-text td{
+	table .scoreboard, td{
 			text-align: center;
 	
-	}
-	td.left-align-text {
-		text-align: left; 
-	}
-	#rules li {
-		text-align: left; !important
-		padding-left: 35px;
-}		
-	#scoreboard td{
-		border: 1px solid #888888;
-	}
-	#scoreboard
-	{
-		border-collapse:collapse;
-		border: 1px solid #888888;
 	}
 	</style>
 </head>
@@ -380,86 +367,13 @@ if($_SESSION['msg'])
     <div id="main">
 	
       <div class="container" style="text-align : center">
+        <h1>Best Ball Majors</h1>
 
-<table>
-<tr>
 
-<td>
-<h1>Best Ball 2017 Scoreboard</h1>
 		<table id="scoreboard">
 			<thead>
 				<tr>
 					<th></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=1">1</a></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=2">2</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=3">3</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=4">4</a></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=5">5</a></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=6">6</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=7">7</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=9">8</a></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=9">9</a></th>
-					<th id="totPlayer" class="tournyHeader playerTotal">Total</th>
-				</tr>
-				<tbody>
-				<?php
-					$servername="localhost";
-					$username="anon";
-					$dbname = "MajorsBB";
-					$password="";
-					$conn = new mysqli($servername, $username, $password, $dbname);
-					$sql = "SELECT * FROM mbb_members";
-					$result = $conn->query($sql);
-					$tournament_totals = array();
-					if($result->num_rows >0)
-					{						
-						$tournament_totals = array();
-						while($row=$result->fetch_assoc())
-						{
-							$playerTotal = 0;
-							echo "<tr>";
-							echo "<td class='center-align-text'>".$row["usr"]."</td>";
-							for($i=1; $i<10;$i++)
-							{
-								$s = "SELECT sum(Entries.EntryScore)as ScoreTotal, Major FROM Entries INNER JOIN Scorecards ON Entries.Scorecard_ID = Scorecards.ID WHERE Entries.Player=".$row["id"]." AND Scorecards.Year=2017 AND Scorecards.Tournament=".$i;
-								$r = $conn->query($s);
-								if($r->num_rows >0)
-								{
-									$d = $r->fetch_assoc();
-									//$playerTotal +=$d["ScoreTotal"];
-									if($d["Major"]==1)
-										$playerTotal += $d["ScoreTotal"];
-									else
-										$tournament_totals[$i] = $d["ScoreTotal"];
-									
-									echo "<td class='center-align-text'>".$d["ScoreTotal"]."</td>";								
-								}
-								else
-									echo "<td class='center-align-text'>0</td>";
-							}
-							//sort($tournament_totals);
-							for($j = 0; $j < 3; $j++)
-							{
-								$playerTotal += $tournament_totals[$j];
-							}
-							echo "<td class='playerTotal center-align-text'>$playerTotal</td></tr>";
-						}						
-					}
-				?>
-			</tbody>
-		</table>
-</td>
-</tr>
-<tr>
-<td>
-	<h1>2017 Schedule</h1>
-</td>
-</tr>
-<tr>
-<td>
-	<table id="schedule">
-		<thead>
-				<tr>
 					<th class="tournyHeader">Tournament</th>
 					<th class="tournyHeader">Date</th>
 					<th class="tournyHeader">Draft</th>
@@ -473,67 +387,7 @@ if($_SESSION['msg'])
 					$dbname = "MajorsBB";
 					$password="";
 					$conn = new mysqli($servername, $username, $password, $dbname);
-					$sql = "SELECT Year, Tournament, Name, StartDate FROM Scorecards WHERE YEAR(StartDate)=2017 GROUP BY Name ORDER BY StartDate";
-					$result = $conn->query($sql);
-					$counter= 0;
-					if($result->num_rows >0)
-					{						
-						while($row=$result->fetch_assoc())
-						{
-							$counter=  $counter +1;
-							$playerTotal = 0;
-							echo "<tr>";
-							echo "<td class='left-align-text'>".$row["Name"]."</td>";
-							echo "<td class='left-align-text'>".date("l, F j", strtotime($row["StartDate"]))."</td>";
-							if((strtotime($row["StartDate"]) > strtotime('-7 day')) & (strtotime($row["StartDate"]) < strtotime('+4 day')))
-								echo "<td><a href='DraftTeam.php?y=2017&t=".$counter."'>Draft</a></td>";
-							else
-								echo "<td>--</td>";
-							if((strtotime($row["StartDate"]) < strtotime('now') ))
-								echo "<td><a href='LeaderboardPageNoScrape.php?y=2017&t=".$counter."'>Leaderboard</td>";
-							else 
-								echo "<td>--</td>";
-							if(strtotime($row["StartDate"]) < strtotime('-4 day'))
-							{
-								$sql = "SELECT  usr, Player, SUM(EntryScore) as 'Score' FROM `Entries` INNER JOIN Scorecards ON Entries.Scorecard_ID = Scorecards.ID AND Year=".$row["Year"]. " AND Tournament=".$row["Tournament"]." INNER JOIN mbb_members WHERE Entries.Player = mbb_members.id GROUP BY Player ORDER BY `Score` ASC";
-								$topPlayerResult = $conn->query($sql);
-								if($result->num_rows >0)
-								{
-									$row2 = $topPlayerResult->fetch_assoc();
-									$TournamentWinner = $row2["usr"];
-								}
-								echo "<td class='center-align-text'>".$TournamentWinner."</td>";	
-							}
-							else
-								echo "<td>--</td>";
-							echo "</tr>";
-						}						
-					}
-				?>
-			</tbody>
-	</table>
-
-        <h1>Best Ball Majors 2016</h1>
-
-
-		<table id="scoreboard_old">
-			<thead>
-				<tr>
-					<th></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=1">Masters</a></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=2">US Open</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=3">British Open</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=4">PGA Champ</a></th>
-					<th id="totPlayer" class="tournyHeader playerTotal">Total</th>
-				</tr>
-				<tbody>
-				<?php
-					$servername="localhost";
-					$username="anon";
-					$dbname = "MajorsBB";
-					$password="";
-					$conn = new mysqli($servername, $username, $password, $dbname);
-					$sql = "SELECT * FROM Players";
+					$sql = "SELECT Name, StartDate FROM Scorecards WHERE YEAR(StartDate)=2017 GROUP BY Name";
 					$result = $conn->query($sql);
 					if($result->num_rows >0)
 					{						
@@ -541,63 +395,28 @@ if($_SESSION['msg'])
 						{
 							$playerTotal = 0;
 							echo "<tr>";
-							echo "<td class='center-align-text'>".$row["Name"]."</td>";
-							for($i=1; $i<5;$i++)
-							{
-								$s = "SELECT sum(Entries.EntryScore) as ScoreTotal FROM Entries INNER JOIN Scorecards ON Entries.Scorecard_ID = Scorecards.ID WHERE Entries.Player=".$row["ID"]." AND Scorecards.Year=2016 AND Scorecards.Tournament=".$i;
-								$r = $conn->query($s);
-								if($r->num_rows >0)
-								{
-									$d = $r->fetch_assoc();
-									$playerTotal +=$d["ScoreTotal"];
-									echo "<td class='center-align-text'>".$d["ScoreTotal"]."</td>";								
-								}
-								else
-									echo "<td class='center-align-text'>0</td>";
-							}
-							echo "<td class='playerTotal center-align-text'>$playerTotal</td></tr>";
+							echo "<td>".$row["Name"]."</td>";
+							echo "<td class='playerTotal'>.$row["Date"]</td></tr>";
 						}						
 					}
 				?>
 			</tbody>
 		</table>
-</td>
-<td>
-</td>
-<td>
-<table style='padding-left:30px; padding-right:30px;'>
-<tr>
-<td>
-</br>
-</td>
-<td rowspan=5>
-<br>
-<ul id='rules'>
-<li>Winner of Non-Majors: $15</li>
-<li>Winner of Majors: $30</li>
-<li>Season 2nd Place: $60</li>
-<li>Season Winner: $165</li>
-<br>
-<br>
-<li>Scored as best ball: lowest score on the hole by your team is your score on the hole</li>
-<li>Your season long score will be your score from all 4 Majors plus your best 3 scores from the non-Majors</li>
-<li>Tie breakers:</li>
-
-<ol>
-<li>Lowest round score for tournament</li>
-<li>Eagle count for tournament</li>
-<li>Birdie count for tournament</li>
-<li>Highest finish of rostered player in 4th round</li>
-</ol>
-<br>
-<br>
-</ul>
-</h3>
-</table>
-</td>
-</tr>
-</table>
 		</div>
+
+		
+		<div>
+		<h2>
+			<a href="DraftTeam.php?y=2016&t=3">Draft your team for the British Open</a>
+		</h2>	</br>
+		<h2>
+			<a href="LeaderboardPageNoScrape.php?y=2016&t=3">View Leaderboard (British Open)</a>			
+			</h2>
+			<h2>
+			<a href="LeaderboardPageNoScrape.php?y=2016&t=1">2016 Masters Results</a>			
+			</h2>
+		</div>
+
 </div>
 
 </body>

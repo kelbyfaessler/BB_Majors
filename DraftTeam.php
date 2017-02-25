@@ -1,6 +1,6 @@
 <?php
  // ini_set('display_errors', '1');
- // ini_set('error_reporting', E_ALL);
+  //ini_set('error_reporting', E_ALL);
  
  
 define('INCLUDE_CHECK',true);
@@ -201,8 +201,14 @@ if($_SESSION['msg'])
 	function UpdateSalaries()
 	{
 		var currentSalaryTotal;
+		var golfer1;
+		var golfer2;
+		var golfer3;
+		var golfer4;
 		 $("#roster table").each(function(){
-			 var total = 0;
+			
+			
+				 var total = 0;
 			 
 				 firstOpenTable=false;
 				 $("tr", $(this)).not("thead tr").each(function(){
@@ -212,8 +218,20 @@ if($_SESSION['msg'])
 				 currentSalaryTotal =  total;
 				 $("#salaryTotal", $(this)).html(34000 - total);
 				 $("#salaryTotal", $(this)).attr("total",total);
-			 
+						 
 		 });
+		$("#roster table").each(function(){
+			if($(this).attr("edit_this")=="true")
+			{
+				var total = 0;
+				$("tr", $(this)).not("thead tr").each(function(){
+					if($(this).attr("isEmpty")==0)
+						total +=parseInt($(this).children(".Salary").html());
+				
+				});
+				currentSalaryTotal = total;
+			}
+		});
 		$("#player_list tr").not("thead tr").each(function(){
 			if(currentSalaryTotal + parseInt($(".Salary", $(this)).html()) > 34000)
 			{
@@ -227,16 +245,66 @@ if($_SESSION['msg'])
 	}
 	$(document).ready(function(){
 		UpdateSalaries();
+		$(".copy_down").click(function(){
+			var myTable = $(this).parents("table");
+			var go = false;
+			$("#roster table").each(function(){
+			 			var index =0;
+
+			   
+			   if(go)
+                           {
+				$("tr.Golfer_row", $(this)).not("thead tr").each(function(){
+					
+				    $(this).children(".Name").html($($("tr.Golfer_row", $(myTable)).children(".Name")[index]).html());
+                                    $(this).children(".Salary").html($($("tr.Golfer_row", $(myTable)).children(".Salary")[index]).html());
+				    $(this).children(".Button").attr("golfer_id", $($("tr.Golfer_row", $(myTable)).children(".Button")[index++]).attr("golfer_id"));
+				    $(this).attr("isEmpty", 0);
+     				    $("button.RemoveGolfer", $(this)).css("visibility", "show");	
+				});
+			   }
+			   if($(this).is($(myTable)))
+			   {
+				go = true;	
+			   }
+			});
+			UpdateSalaries();
+		});
+		$(".edit_roster_round").click(function(){
+			var myTable = $(this).parents("table");
+			var editMode = $(this).html()=="Lock";
+			if(editMode)
+			{
+				$(myTable).removeClass("activeRound");
+				$(this).html("Edit");
+				$(myTable).attr("edit_this", false);
+			}
+			else
+			{
+			 	
+
+				$(".roster_round_table").each(function(){
+					$(".edit_roster_round", $(this)).html("Edit");
+					$(this).attr("edit_this", false);
+					$(this).removeClass("activeRound");
+				});
+				$(this).html("Lock");
+				$(myTable).attr("edit_this", true);
+				$(myTable).addClass("activeRound");
+			}
+			UpdateSalaries();
+
+		});
 		$("#clearEntry").click(function(){
 			$("#roster table").each(function(){
-				if($(this).attr("locked")==0)
+				if($(this).attr("locked")==0 && $(this).attr("edit_this")=="true")
 				{
-					$("tr", $(this)).not("thead tr").each(function(){
+					$("tr.Golfer_row", $(this)).not("thead tr").each(function(){
 						$(this).removeClass("cutPlayer");
 						$(this).children(".Name").html("");
 						$(this).children(".Salary").html("");
 						$(this).children(".Button").attr("golfer_id", "");
-						$("button", $(this)).css("visibility", "hidden")
+						$("button.RemoveGolfer", $(this)).css("visibility", "hidden")
 						$(this).attr("isEmpty", 1)
 
 					});
@@ -256,9 +324,9 @@ if($_SESSION['msg'])
 			$(myRow).attr("isEmpty", 1)
 			
 			$("#roster table").each(function(){
-				if($(this).attr("locked")==0)
+				if($(this).attr("locked")==0 && $(this).attr("edit_this")=="true")
 				{
-					$("tr", $(this)).not("thead tr").each(function(){
+					$("tr.Golfer_row", $(this)).not("thead tr").each(function(){
 						if($(this).children(".Number").html() === rowNum)
 						{
 							$(this).removeClass("cutPlayer");
@@ -273,7 +341,7 @@ if($_SESSION['msg'])
 				}
 			});
 			UpdateSalaries();
-			$("#player_list tr").not("thead tr").each(function(){
+			$("#player_list tr.Golfer_row").not("thead tr").each(function(){
 				if($(".Button", $(this)).attr("golfer_id")==$gID)
 					$(this).css("visibility", "visible");
 			});
@@ -284,13 +352,15 @@ if($_SESSION['msg'])
 			var golfer_id = $(this).parents("tr").children("td.Button").attr("golfer_id");
 			var golfer_name = $(this).parents("tr").children("td.Name").html();
 			var salary = $(this).parents("tr").children("td.Salary").html();
+			var didItChange = false;
 			$("#roster table").each(function(){
-				if($(this).attr("locked")==0)				
+				if($(this).attr("locked")==0 && $(this).attr("edit_this")=="true")				
 				{
 
-					$("tr", $(this)).not("thead tr").each(function(){
+					$("tr.Golfer_row", $(this)).not("thead tr").each(function(){
 						if($(this).attr("isEmpty")==1)
 						{
+							didItChange=true;
 							$(this).children(".Name").html(golfer_name);
 							$(this).children(".Salary").html(salary);
 							$(this).children(".Button").attr("golfer_id", golfer_id);
@@ -302,7 +372,10 @@ if($_SESSION['msg'])
 				}
 			});
 			UpdateSalaries();
-			$(this).css("visibility", "hidden");
+			if(didItChange)
+			{
+				$(this).css("visibility", "hidden");
+			}
 
 		});
 		$("#submitChanges").click(function(){
@@ -316,7 +389,7 @@ if($_SESSION['msg'])
 				if($(this).attr("locked")==0)
 				{
 					var i = 0;
-					$("tr", $(this)).not("thead tr").each(function(){
+					$("tr.Golfer_row", $(this)).not("thead tr").each(function(){
 						if($(this).attr("isEmpty")==0)
 						{
 							entryDetails["Golfers"][i++] = $(this).children(".Button").attr("golfer_id");							
@@ -368,6 +441,12 @@ if($_SESSION['msg'])
  .cutPlayer{
 	 border-style:solid;
 	 border-color:red;
+ }
+ .roster_round_table{
+	 border: 1px solid #000000;
+	 border-collapse: collapse;
+	 padding: 5px;
+	 margin: 5px;
  }
 </style>
 </head>
@@ -551,7 +630,7 @@ if($_SESSION['msg'])
 		//query string params from URL
 		$y = $_GET["y"];
 		$t = $_GET["t"];
-		$sql = "SELECT ID FROM Players WHERE NAME='".$_SESSION['usr']."'";
+		$sql = "SELECT ID FROM mbb_members WHERE usr='".$_SESSION['usr']."'";
 		
 		$result = $conn->query($sql);
 
@@ -586,11 +665,16 @@ if($_SESSION['msg'])
 			$result = $conn->query($sql);
 			echo "
 					
-					<table player_id='".$player."' scorecard_id='".$scorecard_id."' locked=".$isLocked.">
+					<table class='roster_round_table' player_id='".$player."' scorecard_id='".$scorecard_id."' locked=".$isLocked.">
 							<caption>Round ".$i."</caption>
 							<thead>
-								<tr>
-									<th></th>
+								<tr>";
+								if(!$isLocked)
+									echo "<td><button class='edit_roster_round' id='edit_round_".$i."'>Edit</button></td>";
+								else
+									echo "<td></td>";
+								
+								echo	"<th></th>
 									<th>Golfer</th>
 									<th>Salary</th>
 									<th></th>
@@ -599,6 +683,8 @@ if($_SESSION['msg'])
 							<tbody>";
 			if($result->num_rows > 0)
 			{
+				echo "<tr></tr>";
+
 				$entry = $result->fetch_array();
 				for($j=1; $j < 5; $j++)
 				{
@@ -613,13 +699,14 @@ if($_SESSION['msg'])
 						$classString="";
 						if($gd["Cut"]==1)
 							$classString="class='cutPlayer'";
-						echo "<tr isEmpty=0 ".$classString.">
+						echo "<tr class='Golfer_row' isEmpty=0 ".$classString.">
+							<td></td>
 							<td class='Number'>".$j."</td>
 							<td class='Name' style='padding-left:10px'>".$gd['Golfer_Name']."</td>
 							<td class='Salary'>".$gd['Salary']."</td>";
 							
 							if(!$isLocked)
-								echo "<td class='Button' golfer_id='".$gd['ID']."'><button class='RemoveGolfer'  >-</button></td>";
+								echo "<td class='Button Remove' golfer_id='".$gd['ID']."'><button class='RemoveGolfer'  >-</button></td>";
 							else
 								echo "<td></td>";
 						echo "</tr>";
@@ -627,16 +714,17 @@ if($_SESSION['msg'])
 					else
 					{
 							echo "
-							<tr isEmpty=1>
+							<tr isEmpty=1 class='Golfer_row'>
 								<td class='Number'>".$j."</td>
 								<td class='Name' style='padding-left:10px'></td>
 								<td class='Salary'></td>
-								<td class='Button'><button class='RemoveGolfer' style='visibility:hidden;'>-</button></td>
+								<td class='Button Remove'><button class='RemoveGolfer' style='visibility:hidden;'>-</button></td>
 							</tr>";
 					}				
 				}
-				echo "<tr><td></td><td>Remaining:</td><td id='salaryTotal'></td><td></td></tr>";
-				echo "</tbody></table>";
+				echo "<tr><td></td><td>Remaining:</td><td id='salaryTotal'></td><td></td><td></td></tr>";
+				if(!$isLocked)
+					echo "<tr><td><button class='copy_down' id='copy_down_round_".$i."'>Copy Down</button></td><td></td><td></td><td></td><td></td></tr></tbody></table>";
 				
 			}
 			else
@@ -644,7 +732,7 @@ if($_SESSION['msg'])
 				$sql = "INSERT INTO `Entries`(`Player`, `Scorecard_ID`) VALUES (".$player.",".$scorecard_id.")";
 				//echo $sql;
 				$conn->query($sql);
-				
+				echo '<script type="text/javascript">location.reload();</script>';				
 			}
 			
 		}

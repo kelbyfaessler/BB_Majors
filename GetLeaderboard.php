@@ -1,6 +1,6 @@
 <?php
-// ini_set('display_errors', '1');
-//ini_set('error_reporting', E_ALL);
+  //ini_set('display_errors', '1');
+  //ini_set('error_reporting', E_ALL);
  
  
 define('INCLUDE_CHECK',true);
@@ -9,7 +9,7 @@ require 'connect.php';
 require 'functions.php';
 
 
-//this function so far just finds the DIV that holds the table of hole-by-hole data
+		//this function so far just finds the DIV that holds the table of hole-by-hole data
 		function GetScorecardDataFromHtml($input, $rnd)
 		{
 			$dom = new DomDocument();
@@ -370,7 +370,7 @@ class Golfer {
 		else
 			return score;
 	}
-	function CalculateScore(player, round, hole){
+	function CalculateScore(player, round, hole){		
 			var par = $(".r" + round + "h" + hole + "par.holePar").html();
 			
 			var g1score = $("." + player + "> .r" + round + "h" + hole + "g" + 0 + "score.holeScore").html();
@@ -482,7 +482,7 @@ class Golfer {
 			count = count -1;
 			if(count <=0)
 			{
-				//location.reload();
+				location.reload();
 				return;
 			}
 			var minutes = Math.floor(count/60);
@@ -503,7 +503,10 @@ class Golfer {
 				$("." + player + "> .r" + i + "totalTeamScore").html(roundScore).addClass("teamRoundScore");				
 				if(!isNaN(roundScore))
 					playerTotalScore += roundScore;	
-
+				//if(IsPlayerDone(player, i))
+				//{
+					//go insert the roundscore into entries
+					
 					var entry = $(".r" + i, $(this).prev()).attr("entry")
 					var dataString = "Entry=" + entry + "&Score="+roundScore;
 					$.ajax({
@@ -517,12 +520,12 @@ class Golfer {
 					});
 				//}
 			}
-			$("." + player + " > .playerScore").html(playerTotalScore).addClass("teamRoundScore");
+			$("." + player + " > .playerScore").html(playerTotalScore);
 		});
 	});
 	</script>
 <style>
- .holeNum, .holePar, .holeScore, .gRoundScore, .teamScore {
+ .holeNum, .holePar, holeScore {
 	 min-width: 11px !important;
 	 text-align: center;
 	 border:none;
@@ -711,14 +714,20 @@ class Golfer {
 	//query string params from URL
 	$y = $_GET["y"];
 	$t = $_GET["t"];
-	$sql = "SELECT * FROM Scorecards WHERE Year=". $y . " AND Tournament=". $t;
-
-	$result = $conn->query($sql);
-	$scorecard_id = -1;
-	if($result->num_rows > 0)
+	switch($t)
 	{
-		$row = $result->fetch_assoc();
-		$tourn =  $row["Name"];
+		case 1:
+		 $tourn = "Masters";
+		 break;
+		case 2:
+		 $tourn = "US Open";
+		 break;
+		case 3:
+		 $tourn = "British Open";
+		 break;
+		case 4:
+		 $tourn = "PGA Championship";		 
+		 break;
 	}
 	echo "<h1>".$y." ".$tourn."</h1>";
 	echo "<table style='border:solid; ' BORDER=2 RULES=GROUPS id='leaderboard'>";
@@ -802,7 +811,6 @@ $row = $result->fetch_assoc();
 $num_players = $row["num_players"];
 	for($j=1; $j<=$num_players; $j++)
 	{
-
 		echo "<tbody class='pGroup'>";
 		//print player name on new row
 		$sql = "SELECT usr FROM mbb_members WHERE id=" .$j;
@@ -819,10 +827,17 @@ $num_players = $row["num_players"];
 			echo "</tr>";
 		}
 
-		//get all entries from this player for this tournament
-		$sql = "SELECT Entries.Player as P, Entries.Golfer_1 as G1, Entries.Golfer_2 as G2, Entries.Golfer_3 as G3, Entries.Golfer_4 as G4, Entries.ID as eID, Scorecards.ID as scID, Scorecards.Year as Year, Scorecards.Tournament as Tournament, Scorecards.Round as Round  FROM Entries INNER JOIN Scorecards ON Entries.Scorecard_ID=Scorecards.ID WHERE ((Scorecards.Year=".$y.") AND (Scorecards.Tournament=".$t.") AND (Entries.Player=".$j.")) ORDER BY Entries.Scorecard_ID";
-		$result = $conn->query($sql);
 		
+		
+		
+		
+		
+		
+		//get all entries from this player for this tournament
+		$sql = "SELECT Entries.Player as P, Entries.Golfer_1 as G1, Entries.Golfer_2 as G2, Entries.Golfer_3 as G3, Entries.Golfer_4 as G4, Entries.ID as eID, Scorecards.ID as scID, Scorecards.Year as Year, Scorecards.Tournament as Tournament, Scorecards.Round as Round FROM Entries INNER JOIN Scorecards ON Entries.Scorecard_ID=Scorecards.ID WHERE ((Scorecards.Year=".$y.") AND (Scorecards.Tournament=".$t.") AND (Entries.Player=".$j.")) ORDER BY Entries.Scorecard_ID";
+		$result = $conn->query($sql);
+		if(!$result)
+			echo $conn->error;
 
 		//fill an entries array with all entries for this player for this tournament
 		$entries = array();
@@ -851,8 +866,8 @@ $num_players = $row["num_players"];
 			 for($i=0; $i < 4 ; $i++)
 			 {
 				 $sql = "SELECT Golfer_Name, PlayerPage FROM Golfers WHERE ID=". $e->golfers[$i]["ID"];
-				 
-				 if($result = $conn->query($sql))
+				 $result = $conn->query($sql);
+				 if($result->num_rows > 0)
 				 {
 					 $row=$result->fetch_assoc();
 					 $e->golfers[$i]["Name"] = $row["Golfer_Name"];	
@@ -862,13 +877,13 @@ $num_players = $row["num_players"];
 		}
          
 
-
 		 
-		 
-		 
-		 
-		 
-		 //this gives us the direct link to the player page, from which we can get their hole by hole data
+         		
+		
+		
+		//here is the magic
+		//we google the player name and "CBSSPORTS" and "PLAYERPAGE"
+		//this gives us the direct link to the player page, from which we can get their hole by hole data
 		foreach($entries as $e)
 		{
 			$sql = "SELECT IsLocked FROM Scorecards WHERE ID = " .$e->scID;
@@ -935,32 +950,35 @@ $num_players = $row["num_players"];
 								$e->golfers[$i]["PlayerPage"] = $playerPageUrl;*/
 							}
 						}
+						 //else
+							 //echo "<br>Already have player URL";
+
 					}
 				}
 		}
 		unset($e);
 
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		/* //here we should push the PlayerPage values into the Golfers table
+		 $conn = new mysqli($servername, $username, $password, $dbname);
+		 foreach($entries as $e)
+		 {
+			 for($i = 0; $i < 4; $i++)
+			 {
+				 $sql = "UPDATE Golfers SET PlayerPage =  '" . $e->golfers[$i]["PlayerPage"] . "' WHERE ID=" . $e->golfers[$i]["ID"];
+				 echo $sql;
+				 if($conn->query($sql) === TRUE)
+				 {
+					 echo "Record Updated Sucessfully";
+				 }
+				 else {
+					 echo "Error Updating Record";
+				 }
+			 }
+		 }
+		 $conn->close();
+
+*/
+
 		
 		//iterate on ROUNDS here.  Need to print a whole row at a time (R1-G1 scores R2-G1 scores R3-G1 scores R4-G1 scores)
 
@@ -981,8 +999,6 @@ $num_players = $row["num_players"];
 				
 				if($l==1)
 				{
-					//commenting out for now - no scraping from the NoScrape page
-					/*
 					if(!empty($e->golfers[$i]["PlayerPage"]))
 					{
 						$sql = "SELECT Total FROM GolferScores WHERE Golfer_ID=".$e->golfers[$i]["ID"]." AND Scorecard_ID=".$e->scID;
@@ -1001,7 +1017,7 @@ $num_players = $row["num_players"];
 						}
 							
 						if(!$done)
-						{*/
+						{
 							$sql = "SELECT LastRefreshed FROM Scorecards WHERE ID = " .$e->scID;
 							$result = $conn->query($sql);
 							$row = $result->fetch_assoc();
@@ -1024,7 +1040,7 @@ $num_players = $row["num_players"];
 									$result = $conn->query($sql);
 									$lastRefreshUpdated = true;
 								}
-								/*if($e->rnd == $roundNumber)
+								if($e->rnd == $roundNumber)
 								{
 									//echo "</br>Here comes data for ".$e->golfers[$i]["Name"];
 									$url = $e->golfers[$i]["PlayerPage"];
@@ -1033,10 +1049,10 @@ $num_players = $row["num_players"];
 									$hScores = GetScorecardDataFromHtml($output, $roundNumber);
 									//echo $hScores;
 									SubmitGolferScores($hScores, $e->golfers[$i]["ID"], $e->scID, $e->entryID);
-								}*/
+								}
 							}
-						//}
-					//}
+						}
+					}
 					
 					$sql = "SELECT Hole_1,
 									Hole_2,
@@ -1079,9 +1095,8 @@ $num_players = $row["num_players"];
 								<td class='r".$roundNumber."h16g".$i."score holeScore'>".$row["Hole_16"]."</td>
 								<td class='r".$roundNumber."h17g".$i."score holeScore'>".$row["Hole_17"]."</td>
 								<td class='r".$roundNumber."h18g".$i."score holeScore'>".$row["Hole_18"]."</td>
-								<td class='r".$roundNumber."totg".$i."score  gRoundScore'>".$row["Total"]."</td>
+								<td class='r".$roundNumber."totg".$i."score holeScore'>".$row["Total"]."</td>
 								";
-					
 				}
 				else
 				{
@@ -1113,7 +1128,7 @@ $num_players = $row["num_players"];
 			}
 			echo "</tr>";	
 		 }//this is the per hole scoring row for the PLAYER/TEAM
-		 echo "<tr player='".$playerName."' class='".$playerName." scoreRow'><td colspan=2 class='playerScore'>Score:</td>";
+		 echo "<tr player='".$playerName."' class='".$playerName." scoreRow' ><td colspan=2 class='playerScore'>Score:</td>";
 		 for($i=1;$i<5;$i++)
 		 {
 						echo "<td class='r".$i."h1teamScore teamScore'></td>
@@ -1137,7 +1152,7 @@ $num_players = $row["num_players"];
 								<td class='r".$i."totalTeamScore holeScore'></td>
 								<td></td><td></td>"; 
 		 }
-		 echo "</tbody>";
+		 echo "</tr><tr><td>----</td><tr>";		 
 	}
 		
 	

@@ -43,12 +43,14 @@ h3{
 }
 
 #main{
-	width:900px;
+	width:1300px;
 	/* Centering it in the middle of the page */
-
+		/*weird comment*/
 	margin:60px auto;
 }
-
+.activeRound{
+	background: #BCC6CC;
+}
 .container{
 	margin-top:20px;
 	
