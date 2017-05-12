@@ -262,10 +262,11 @@ if($_SESSION['msg'])
 		border-collapse:collapse;
 		border: 1px solid #888888;
 	}
+
 	</style>
 </head>
 
-<body>
+<body style="background-color:#006b54">
 
 <!-- Panel -->
 <div id="toppanel">
@@ -376,29 +377,30 @@ if($_SESSION['msg'])
 
    <!-- PUT ALL PAGE CONTENT HERE --> 
 
-<div class="pageContent">
+<div class="pageContent" >
     <div id="main">
 	
       <div class="container" style="text-align : center">
 
-<table>
+<table >
 <tr>
 
 <td>
 <h1>Best Ball 2017 Scoreboard</h1>
-		<table id="scoreboard">
+
+		<table id="scoreboard" >
 			<thead>
 				<tr>
 					<th></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=1">1</a></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=2">2</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=3">3</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=4">4</a></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=5">5</a></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=6">6</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=7">7</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=9">8</a></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2017&t=9">9</a></th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2017&t=1">1</a></th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2017&t=2">2</a>	</th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2017&t=3">3</a>	</th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2017&t=4">4</a></th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2017&t=5">5</a></th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2017&t=6">6</a>	</th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2017&t=7">7</a>	</th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2017&t=9">8</a></th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2017&t=9">9</a></th>
 					<th id="totPlayer" class="tournyHeader playerTotal">Total</th>
 				</tr>
 				<tbody>
@@ -438,7 +440,8 @@ if($_SESSION['msg'])
 									echo "<td class='center-align-text'>0</td>";
 							}
 							//sort($tournament_totals);
-							for($j = 0; $j < 3; $j++)
+							//$playerTotal = 0;
+							for($j = 0; $j < count($tournament_totals); $j++)
 							{
 								$playerTotal += $tournament_totals[$j];
 							}
@@ -473,7 +476,7 @@ if($_SESSION['msg'])
 					$dbname = "MajorsBB";
 					$password="";
 					$conn = new mysqli($servername, $username, $password, $dbname);
-					$sql = "SELECT Year, Tournament, Name, StartDate FROM Scorecards WHERE YEAR(StartDate)=2017 GROUP BY Name ORDER BY StartDate";
+					$sql = "SELECT Year, Tournament, Name, StartDate, Winner FROM Scorecards WHERE YEAR(StartDate)=2017 GROUP BY Name ORDER BY StartDate";
 					$result = $conn->query($sql);
 					$counter= 0;
 					if($result->num_rows >0)
@@ -486,23 +489,16 @@ if($_SESSION['msg'])
 							echo "<td class='left-align-text'>".$row["Name"]."</td>";
 							echo "<td class='left-align-text'>".date("l, F j", strtotime($row["StartDate"]))."</td>";
 							if((strtotime($row["StartDate"]) > strtotime('-7 day')) & (strtotime($row["StartDate"]) < strtotime('+4 day')))
-								echo "<td><a href='DraftTeam.php?y=2017&t=".$counter."'>Draft</a></td>";
+								echo "<td><a href='draft.php?y=2017&t=".$counter."'>Draft</a></td>";
 							else
 								echo "<td>--</td>";
 							if((strtotime($row["StartDate"]) < strtotime('now') ))
-								echo "<td><a href='LeaderboardPageNoScrape.php?y=2017&t=".$counter."'>Leaderboard</td>";
+								echo "<td><a href='Leaderboard.php?y=2017&t=".$counter."'>Leaderboard</td>";
 							else 
 								echo "<td>--</td>";
 							if(strtotime($row["StartDate"]) < strtotime('-4 day'))
 							{
-								$sql = "SELECT  usr, Player, SUM(EntryScore) as 'Score' FROM `Entries` INNER JOIN Scorecards ON Entries.Scorecard_ID = Scorecards.ID AND Year=".$row["Year"]. " AND Tournament=".$row["Tournament"]." INNER JOIN mbb_members WHERE Entries.Player = mbb_members.id GROUP BY Player ORDER BY `Score` ASC";
-								$topPlayerResult = $conn->query($sql);
-								if($result->num_rows >0)
-								{
-									$row2 = $topPlayerResult->fetch_assoc();
-									$TournamentWinner = $row2["usr"];
-								}
-								echo "<td class='center-align-text'>".$TournamentWinner."</td>";	
+								echo "<td class='center-align-text'>".$row["Winner"]."</td>";	
 							}
 							else
 								echo "<td>--</td>";
@@ -520,10 +516,10 @@ if($_SESSION['msg'])
 			<thead>
 				<tr>
 					<th></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=1">Masters</a></th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=2">US Open</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=3">British Open</a>	</th>
-					<th class="tournyHeader"><a href="LeaderboardPageNoScrape.php?y=2016&t=4">PGA Champ</a></th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2016&t=1">Masters</a></th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2016&t=2">US Open</a>	</th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2016&t=3">British Open</a>	</th>
+					<th class="tournyHeader"><a href="Leaderboard.php?y=2016&t=4">PGA Champ</a></th>
 					<th id="totPlayer" class="tournyHeader playerTotal">Total</th>
 				</tr>
 				<tbody>
@@ -565,11 +561,8 @@ if($_SESSION['msg'])
 <td>
 </td>
 <td>
-<table style='padding-left:30px; padding-right:30px;'>
+<table style='padding-left:30px; padding-right:30px;'><tr><td><div><img src='http://www.linkslifegolf.com/wp-content/uploads/2016/03/masters-flag-hole-250x175.jpg'></div></td></tr>
 <tr>
-<td>
-</br>
-</td>
 <td rowspan=5>
 <br>
 <ul id='rules'>

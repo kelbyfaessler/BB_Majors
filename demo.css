@@ -5,11 +5,10 @@ body,h1,h2,h3,p,quote,small,form,input,ul,li,ol,label{
 }
 
 body{
-	color:#555555;
+	background-color:#006b54;
 	font-size:13px;
-	background: #eeeeee;
 	font-family:Arial, Helvetica, sans-serif;
-	width: 100%;
+	width: auto;
 }
 
 h1{
@@ -17,6 +16,7 @@ h1{
 	font-weight:bold;
 	font-family:"Trebuchet MS",Arial, Helvetica, sans-serif;
 	letter-spacing:1px;
+	color:#000000;
 }
 
 h2{
@@ -32,7 +32,7 @@ h2{
 }
 h3{
 	
-	color:#FF0000;
+	color:#000000;
 }
 #main p{
 	padding-bottom:8px;
@@ -48,9 +48,7 @@ h3{
 		/*weird comment*/
 	margin:60px auto;
 }
-.activeRound{
-	background: #BCC6CC;
-}
+
 .container{
 	margin-top:20px;
 	

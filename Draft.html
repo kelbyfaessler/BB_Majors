@@ -1,0 +1,74 @@
+<script type='text/javascript' src='//code.jquery.com/jquery-1.12.4.js'/>
+<script type='text/javascript' src='https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js'/>
+
+
+
+<script>
+$(document).ready(function(){
+	$("#golfers").DataTable({
+		"processing":true,
+		"serverSide":true,
+		"ajax":"",
+	});
+});
+</script>
+
+<body>
+
+<div style='width: 800px;position: absolute; margin: auto;top: 0;right: 0;bottom: 0;left: 0;height:750px;background-color: #ccc;border-radius: 8px;'>
+	<div style='padding-left:20px'><h1>Draft your team</h1></div>
+	<div style='padding-left:20px;width:400px;float:left;'>
+		<table id='golfers'>
+			<thead>
+				<tr>
+					<th>Golfer</th>
+					<th>Salary</th>
+					<th></th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	<div style='overflow:hidden;'>
+		<table id='ThursdayRoster'>
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Name</th>
+					<th>Salary</th>
+					<th></th>
+				</tr>
+			</thead>
+		</table>
+		<table id='FridayRoster'>
+		<thead>
+				<tr>
+					<th>#</th>
+					<th>Name</th>
+					<th>Salary</th>
+					<th></th>
+				</tr>
+			</thead>
+		</table>
+		<table id='SaturdayRoster'>
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Name</th>
+					<th>Salary</th>
+					<th></th>
+				</tr>
+			</thead>
+		</table>
+		<table id='SundayRoster'>
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Name</th>
+					<th>Salary</th>
+					<th></th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	</div>
+</body>

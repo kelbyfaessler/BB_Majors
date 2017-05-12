@@ -348,7 +348,7 @@ class Golfer {
       
     <link rel="stylesheet" type="text/css" href="demo.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="login_panel/css/slide.css" media="screen" />
-    
+
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
     
     <!-- PNG FIX for IE6 -->
@@ -472,6 +472,27 @@ class Golfer {
 			return true;
 	}
 	$(document).ready(function(){
+		
+		$(".collapseButton").html("<img style='width:10px;height:10px' src='minus.png'>");
+		$("table").on("click", "tbody", function () {
+ 	        var $this = $(this);
+       		var myTRs = $this.children("tr").not(".scoreRow");
+
+		        if ($this.hasClass("collapsed")) {
+            			$this.removeClass("collapsed");
+			        myTRs.first().remove();            
+				$(".collapseButton",$(this)).html("<img style='width:10px;height:10px' src='minus.png'>");
+			        myTRs.show();
+		        } else {
+        			$this.addClass("collapsed");
+			        var newInfo = myTRs.first().children("td").eq(1).text();
+				
+		        	myTRs.hide();
+			        $this.prepend($("<tr><td class='collapseButton'></td><td colspan='3'>" + newInfo + "</td></tr>").hide()).find("tr").first().slideDown();
+				$(".collapseButton",$(this)).html("<img style='width:10px;height:10px' src='plus.png'>");
+		        }
+	        });		
+
 		var count = 300 - parseInt($("#refreshInterval").html());
 		var counter = setInterval(timer, 1000);
 		function str_pad_left(string,pad,length) {
@@ -519,6 +540,24 @@ class Golfer {
 			}
 			$("." + player + " > .playerScore").html(playerTotalScore).addClass("teamRoundScore");
 		});
+		$("tbody.loggedinuser").prependTo('table');
+		$("tbody.headerSection").prependTo('table');
+		$("table tbody.pgroup").each(function () {
+			
+ 	        var $this = $(this);
+       		var myTRs = $this.children("tr").not(".scoreRow");
+
+			if (!$(this).hasClass("loggedinuser"))
+			{
+				$this.addClass("collapsed");
+				var newInfo = myTRs.first().children("td").eq(1).text();
+			
+				myTRs.hide();
+				$this.prepend($("<tr><td class='collapseButton'></td><td colspan='3'>" + newInfo + "</td></tr>").hide()).find("tr").first().slideDown();
+				$(".collapseButton",$(this)).html("<img style='width:10px;height:10px' src='plus.png'>");
+			}
+		});	
+		
 	});
 	</script>
 <style>
@@ -694,7 +733,7 @@ class Golfer {
 
 <!-- PUT ALL CONTENT HERE -->
 
-<div style="padding-top:45px">
+<div style="padding-top:45px;">
 			<a href="MajorsBBHome.php">&#60&#60Return Home</a>
 	<?php
 	//our local DB params
@@ -711,6 +750,7 @@ class Golfer {
 	//query string params from URL
 	$y = $_GET["y"];
 	$t = $_GET["t"];
+
 	$sql = "SELECT * FROM Scorecards WHERE Year=". $y . " AND Tournament=". $t;
 
 	$result = $conn->query($sql);
@@ -720,20 +760,23 @@ class Golfer {
 		$row = $result->fetch_assoc();
 		$tourn =  $row["Name"];
 	}
-	echo "<h1>".$y." ".$tourn."</h1>";
-	echo "<table style='border:solid; ' BORDER=2 RULES=GROUPS id='leaderboard'>";
-	echo "<colgroup span=21></colgroup>";
-	echo "<colgroup span=21></colgroup>";
-	echo "<colgroup span=21></colgroup>";
-	echo "<colgroup span=21></colgroup>";
-	echo "<tr>";
+	echo "<h1 style='color:#000000'>".$y." ".$tourn."</h1>";
+	echo "<table style='border:solid; background-color:#EEEEEE' BORDER=2 RULES=GROUPS id='leaderboard'>";
+	echo "<colgroup span=22></colgroup>";
+	echo "<colgroup span=22></colgroup>";
+	echo "<colgroup span=22></colgroup>";
+	echo "<colgroup span=22></colgroup>";
+	echo "<class='ui-widget-content'>";
+	echo "<tbody class='headerSection'><tr>";
 	for($j=1; $j<5; $j++)
 	{
 		echo "<td></td><td></td><td colspan=19 style='text-align:center'>Round ".$j."</td>";
 	}
 	echo "</tr><tr>";
+	
 	for($j=1; $j<5; $j++)
 	{
+		echo "<td></td>";
 		echo "<td class='holeNum'></td>
 			  <td class='holeNum'></td>
 			  <td class='holeNum'>1</td>
@@ -757,8 +800,10 @@ class Golfer {
 			  <td class='holeNum'>Tot</td>";
 	}
 	echo "</tr><tr id='holePars'>";
+	
 	for($j=1; $j<5; $j++)
 	{
+		echo "<td></td>";
 		//need to scorecard ID from the Tournament + Year + Round info in order to find the right entries
 		$sql = "SELECT * FROM Scorecards WHERE Year=". $y . " AND Tournament=". $t . " AND Round=" .$j;
 
@@ -800,22 +845,28 @@ $sql = "SELECT COUNT(*) as num_players FROM mbb_members";
 $result=$conn->query($sql);
 $row = $result->fetch_assoc();
 $num_players = $row["num_players"];
-	for($j=1; $j<=$num_players; $j++)
+	for($j=$num_players; $j>0; $j--)
 	{
 
-		echo "<tbody class='pGroup'>";
+		
 		//print player name on new row
 		$sql = "SELECT usr FROM mbb_members WHERE id=" .$j;
 		$result=$conn->query($sql);
+		
 		if($result->num_rows > 0)
 		{
 			$row = $result->fetch_assoc();
 			$playerName=$row["usr"];
-			echo "<tr class='".$playerName."'>";
+			 if($playerName==$_SESSION['usr'])
+				echo "<tbody class='pgroup loggedinuser'>";
+			 else
+				echo "<tbody class='pgroup'>";
+			echo "<tr class='".$playerName.",".$_SESSION['usr']."'>";
+			echo "<td class='collapseButton'></td>";
 			echo "<td class='playerName' colspan=21>".$playerName."</td>";
-			echo "<td class='playerName' colspan=21>".$playerName."</td>";
-			echo "<td class='playerName' colspan=21>".$playerName."</td>";
-			echo "<td class='playerName' colspan=21>".$playerName."</td>";
+			echo "<td class='playerName' colspan=22>".$playerName."</td>";
+			echo "<td class='playerName' colspan=22>".$playerName."</td>";
+			echo "<td class='playerName' colspan=22>".$playerName."</td>";
 			echo "</tr>";
 		}
 
@@ -967,6 +1018,7 @@ $num_players = $row["num_players"];
 		for($i=0; $i < 4 ; $i++)
 		{
 			echo "<tr class='".$playerName."'>";
+			echo "<td></td>";
 			//go through each entry and use only the indexed golfer
 			$roundNumber = 1;
 			$lastRefreshUpdated = false;
@@ -1079,7 +1131,7 @@ $num_players = $row["num_players"];
 								<td class='r".$roundNumber."h16g".$i."score holeScore'>".$row["Hole_16"]."</td>
 								<td class='r".$roundNumber."h17g".$i."score holeScore'>".$row["Hole_17"]."</td>
 								<td class='r".$roundNumber."h18g".$i."score holeScore'>".$row["Hole_18"]."</td>
-								<td class='r".$roundNumber."totg".$i."score  gRoundScore'>".$row["Total"]."</td>
+								<td class='r".$roundNumber."totg".$i."score  gRoundScore'>".$row["Total"]."</td><td></td>
 								";
 					
 				}
@@ -1114,8 +1166,10 @@ $num_players = $row["num_players"];
 			echo "</tr>";	
 		 }//this is the per hole scoring row for the PLAYER/TEAM
 		 echo "<tr player='".$playerName."' class='".$playerName." scoreRow'><td colspan=2 class='playerScore'>Score:</td>";
+		 
 		 for($i=1;$i<5;$i++)
 		 {
+	echo "<td></td>";
 						echo "<td class='r".$i."h1teamScore teamScore'></td>
 								<td class='r".$i."h2teamScore teamScore'></td>
 								<td class='r".$i."h3teamScore teamScore'></td>
@@ -1142,6 +1196,7 @@ $num_players = $row["num_players"];
 		
 	
 	//echo "</tr>";
+	
 	echo "</table>";
 	?>
 	</div>
